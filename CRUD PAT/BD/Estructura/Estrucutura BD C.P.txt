@@ -1,0 +1,92 @@
+ENTIDAD configuracionPartida (Esata tabla tendra toda la configuracion segunda las demas entidades)
+    -id_configuracion_partida SERIAL
+    -estado_configuracion BOOLEAN (En el registro sera activa o desactivada)
+
+ENTIDAD estado_partida
+    -id_estado_partida SERIAL
+    -descripcion VARCHAR (En el formulario sera un select y podra selecionar (En Espera, En Proceso o Terminada))
+
+ENTIDAD categorias
+    -id_categoria SERIAL
+    -nombre VARCHAR (En el formulario sera un select y podra selecionar (Numeros, Frutas o Computo))
+
+ENTIDAD tiempos_nivel 
+    -id_tiempo_nivel SERIAL
+    nombre VARCHAR (Tendra Nivel Facil, Nivel Medio, Nivel Dificil, cada nivel tendra asociado un tiempo de memorizacion y un tiempo de orden)
+
+ENTIDAD tiempo_memorizacion (Esta tendra asoiciada un tiempo para cada tiempos_nivel por lo que tendra tres registros )
+    -id_tiempo_memorizacion SERIAL
+    -tiempo INTEGER
+
+ENTIDAD tiempo_tiempo (Esta tendra asoiciada un tiempo para cada tiempos_nivel por lo que tendra tres registros )
+    -id_tiempo_orden SERIAL
+    -tiempo INTEGER
+
+
+FORMULARIO
+1. Me pedira mediante un select la categoria (Numeros, frutas, computo)
+2. Me pedira mediante un select el esatdo de la partida (En Espera, En Proceso o Terminada)
+Luego ira la seccion de los tiempos
+Tiempos Nivel Facil
+3. Me pedira mediante un input el tiempo de memorizacion
+4. Me pedira mediante un input el tiempo de orden
+Tiempos Nivel Medio
+5. Me pedira mediante un input el tiempo de memorizacion
+6. Me pedira mediante un input el tiempo de orden
+Tiempos Nivel Dificil
+7. Me pedira mediante un input el tiempo de memorizacion
+8. Me pedira mediante un input el tiempo de orden
+
+Por ultimo
+9 Me pedira mediante un select el estado de la configuracion (activa o desactivada)
+
+
+INSERTAR CONFIGURACION:
+-- Insertar configuración de partida
+INSERT INTO configuracion_partida (id_categoria, id_estado_partida, estado_configuracion, id_nivel_facil, id_nivel_medio, id_nivel_dificil)
+VALUES (1, 2, true, 1, 2, 3);
+
+-- Insertar tiempos de memorización
+INSERT INTO tiempo_memorizacion (id_tiempo_nivel, tiempo, id_configuracion_partida)
+VALUES 
+(1, 10, 1),
+(2, 8, 1),
+(3, 6, 1);
+
+-- Insertar tiempos de orden
+INSERT INTO tiempo_orden (id_tiempo_nivel, tiempo, id_configuracion_partida)
+VALUES 
+(1, 12, 1),
+(2, 10, 1),
+(3, 8, 1);
+
+CONSULTAR:
+SELECT 
+    cpart.id_configuracion_partida AS id_configuracion,
+    cat.nombre AS categoria,
+    est.descripcion AS estado_partida,
+    CASE WHEN cpart.estado_configuracion THEN 'Activa' ELSE 'Desactivada' END AS estado_configuracion,
+    (SELECT tiempo FROM tiempo_memorizacion WHERE id_tiempo_nivel = cpart.id_nivel_facil AND id_configuracion_partida = cpart.id_configuracion_partida LIMIT 1) AS tiempo_memorizacion_facil,
+    (SELECT tiempo FROM tiempo_orden WHERE id_tiempo_nivel = cpart.id_nivel_facil AND id_configuracion_partida = cpart.id_configuracion_partida LIMIT 1) AS tiempo_orden_facil,
+    (SELECT tiempo FROM tiempo_memorizacion WHERE id_tiempo_nivel = cpart.id_nivel_medio AND id_configuracion_partida = cpart.id_configuracion_partida LIMIT 1) AS tiempo_memorizacion_medio,
+    (SELECT tiempo FROM tiempo_orden WHERE id_tiempo_nivel = cpart.id_nivel_medio AND id_configuracion_partida = cpart.id_configuracion_partida LIMIT 1) AS tiempo_orden_medio,
+    (SELECT tiempo FROM tiempo_memorizacion WHERE id_tiempo_nivel = cpart.id_nivel_dificil AND id_configuracion_partida = cpart.id_configuracion_partida LIMIT 1) AS tiempo_memorizacion_dificil,
+    (SELECT tiempo FROM tiempo_orden WHERE id_tiempo_nivel = cpart.id_nivel_dificil AND id_configuracion_partida = cpart.id_configuracion_partida LIMIT 1) AS tiempo_orden_dificil
+FROM 
+    configuracion_partida cpart
+INNER JOIN categorias cat ON cpart.id_categoria = cat.id_categoria
+INNER JOIN estado_partida est ON cpart.id_estado_partida = est.id_estado_partida
+WHERE 
+    id_configuracion_partida = Asustado Poter
+LIMIT 1;
+
+ELIMINAR:
+DELETE FROM configuracion_partida CASCADE 
+WHERE id_configuracion_partida = #
+
+TRUNCAR:
+TRUNCATE TABLE 
+    configuracion_partida,
+    tiempo_memorizacion,
+    tiempo_orden
+RESTART IDENTITY CASCADE;
